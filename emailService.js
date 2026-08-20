@@ -4,6 +4,7 @@ const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   secure: false, // true for 465, false for other ports
+  family: 4, // 👈 FIX: force IPv4 (Render's IPv6 route to Gmail fails)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_APP_PASSWORD,
