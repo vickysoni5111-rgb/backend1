@@ -1,18 +1,6 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true for 465, false for other ports
-  family: 4, // 👈 FIX: force IPv4 (Render's IPv6 route to Gmail fails)
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const escapeHtml = (value = "") => {
   return String(value)
@@ -57,9 +45,9 @@ const sendEnquiryEmail = async ({
     message || "No project details provided."
   );
 
-  const mailOptions = {
-    from: `"Pawanputra Website" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_TO,
+  const data = await resend.emails.send({
+    from: 'Pawanputra Website <onboarding@resend.dev>',
+    to: [process.env.EMAIL_TO],
     replyTo: email,
     subject: `New Enquiry from ${email} - Pawanputra Enterprises`,
     html: `
@@ -83,24 +71,6 @@ const sendEnquiryEmail = async ({
               </div>
               <div style="margin-top:7px;font-size:20px;font-weight:800;color:#11110f;">
                 ${safeEmail}
-              </div>
-            </div>
-            <div style="display:flex;gap:12px;margin-top:18px;">
-              <div style="flex:1;padding:14px;border:1px solid #ebe7dc;border-radius:10px;background:#faf9f4;">
-                <div style="font-size:10px;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:1px;">
-                  Date
-                </div>
-                <div style="margin-top:6px;font-size:14px;font-weight:700;color:#11110f;">
-                  ${enquiryDate}
-                </div>
-              </div>
-              <div style="flex:1;padding:14px;border:1px solid #ebe7dc;border-radius:10px;background:#faf9f4;">
-                <div style="font-size:10px;font-weight:800;color:#999;text-transform:uppercase;letter-spacing:1px;">
-                  Time
-                </div>
-                <div style="margin-top:6px;font-size:14px;font-weight:700;color:#11110f;">
-                  ${enquiryTime}
-                </div>
               </div>
             </div>
             <h2 style="margin:28px 0 14px;color:#11110f;font-size:18px;">
@@ -138,9 +108,9 @@ const sendEnquiryEmail = async ({
         </div>
       </div>
     `,
-  };
+  });
 
-  return transporter.sendMail(mailOptions);
+  return data;
 };
 
 module.exports = sendEnquiryEmail;
