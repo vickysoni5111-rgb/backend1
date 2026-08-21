@@ -1,6 +1,12 @@
-const { Resend } = require('resend');
+const nodemailer = require("nodemailer");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
 
 const escapeHtml = (value = "") => {
   return String(value)
@@ -19,23 +25,6 @@ const sendEnquiryEmail = async ({
   service,
   message,
 }) => {
-  const now = new Date();
-
-  const enquiryDate = new Intl.DateTimeFormat("en-IN", {
-    timeZone: "Asia/Kolkata",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  }).format(now);
-
-  const enquiryTime = new Intl.DateTimeFormat("en-IN", {
-    timeZone: "Asia/Kolkata",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  }).format(now);
-
   const safeName = escapeHtml(name);
   const safePhone = escapeHtml(phone);
   const safeEmail = escapeHtml(email);
@@ -45,9 +34,9 @@ const sendEnquiryEmail = async ({
     message || "No project details provided."
   );
 
-  const data = await resend.emails.send({
-    from: 'Pawanputra Website <onboarding@resend.dev>',
-    to: [process.env.EMAIL_TO],
+  const mailOptions = {
+    from: `"Pawanputra Website" <${process.env.EMAIL_USER}>`,
+    to: process.env.EMAIL_TO,
     replyTo: email,
     subject: `New Enquiry from ${email} - Pawanputra Enterprises`,
     html: `
@@ -108,9 +97,19 @@ const sendEnquiryEmail = async ({
         </div>
       </div>
     `,
-  });
+  };
 
-  return data;
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ EMAIL SENT SUCCESSFULLY via Gmail");
+    console.log("Message ID:", info.messageId);
+    return { messageId: info.messageId };
+  } catch (err) {
+    console.error("❌ Nodemailer/Gmail Error:", err);
+    throw new Error(
+      err.message || "Failed to send enquiry email via Gmail."
+    );
+  }
 };
 
 module.exports = sendEnquiryEmail;
