@@ -1,8 +1,9 @@
 const { Resend } = require("resend");
 
-// Render Environment variable se API Key read karega
+// Render / .env file se Resend API Key read karega
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// HTML Characters Escape function (XSS Prevention)
 const escapeHtml = (value = "") => {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -29,10 +30,13 @@ const sendEnquiryEmail = async ({
     message || "No project details provided."
   );
 
+  // Exact recipient address
+  const recipient = process.env.EMAIL_TO || "ramanpipla32@gmail.com";
+
   try {
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: "Pawanputra Website <onboarding@resend.dev>",
-      to: [process.env.EMAIL_TO || "Ramanpipla32@gmail.com"],
+      to: [recipient],
       replyTo: email,
       subject: `New Enquiry from ${email} - Pawanputra Enterprises`,
       html: `
@@ -95,13 +99,16 @@ const sendEnquiryEmail = async ({
       `,
     });
 
+    if (error) {
+      console.error("❌ Resend Error Response:", error);
+      throw new Error(error.message || "Resend API failed to send email.");
+    }
+
     console.log("✅ EMAIL SENT SUCCESSFULLY via Resend API", data);
     return { messageId: data.id };
   } catch (err) {
-    console.error("❌ Resend API Error:", err);
-    throw new Error(
-      err.message || "Failed to send enquiry email."
-    );
+    console.error("❌ Email Service Exception:", err.message);
+    throw new Error(err.message || "Failed to send enquiry email.");
   }
 };
 
