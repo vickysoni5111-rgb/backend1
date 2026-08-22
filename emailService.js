@@ -1,9 +1,12 @@
+
+
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
+  family: 4,              // 👈 YE LINE ADD KARO - forces IPv4, IPv6 issue fix karti hai
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_APP_PASSWORD,
@@ -13,7 +16,6 @@ const transporter = nodemailer.createTransport({
   maxMessages: 50,
   connectionTimeout: 10000,
 });
-
 const escapeHtml = (value = "") => {
   return String(value)
     .replace(/&/g, "&amp;")
