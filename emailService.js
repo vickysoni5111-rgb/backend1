@@ -30,7 +30,9 @@ const sendEnquiryEmail = async ({
   const safeEmail = escapeHtml(email);
   const safeCompany = escapeHtml(company || "Not Provided");
   const safeService = escapeHtml(service || "Not Selected");
-  const safeMessage = escapeHtml(message || "No project details provided.");
+  const safeMessage = escapeHtml(
+    message || "No project details provided."
+  );
 
   const mailOptions = {
     from: `"Pawanputra Website" <${process.env.EMAIL_USER}>`,
@@ -103,8 +105,10 @@ const sendEnquiryEmail = async ({
     console.log("Message ID:", info.messageId);
     return { messageId: info.messageId };
   } catch (err) {
-    console.error("❌ Gmail Error:", err);
-    throw new Error(err.message || "Failed to send enquiry email via Gmail.");
+    console.error("❌ Nodemailer/Gmail Error:", err);
+    throw new Error(
+      err.message || "Failed to send enquiry email via Gmail."
+    );
   }
 };
 
