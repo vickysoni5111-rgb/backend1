@@ -1,10 +1,17 @@
 const nodemailer = require("nodemailer");
 
+// Direct SMTP configuration with IPv4 force & Port 465
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // Port 465 ke saath true zaroori h
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_APP_PASSWORD,
+  },
+  family: 4, // 👈 ENETUNREACH IPv6 error ko fix karne ke liye IPv4 force karega
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
