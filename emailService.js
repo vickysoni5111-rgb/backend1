@@ -1,9 +1,8 @@
 const { Resend } = require("resend");
 
-// Render / .env file se Resend API Key read karega
+// Reads RESEND_API_KEY from environment
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// HTML Characters Escape function (XSS Prevention)
 const escapeHtml = (value = "") => {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -26,12 +25,11 @@ const sendEnquiryEmail = async ({
   const safeEmail = escapeHtml(email);
   const safeCompany = escapeHtml(company || "Not Provided");
   const safeService = escapeHtml(service || "Not Selected");
-  const safeMessage = escapeHtml(
-    message || "No project details provided."
-  );
+  const safeMessage = escapeHtml(message || "No project details provided.");
 
-  // Exact recipient address
-  const recipient = process.env.EMAIL_TO || "ramanpipla32@gmail.com";
+  // Automatically enforce lowercase email for Resend compatibility
+  const rawRecipient = process.env.EMAIL_TO || "ramanpipla32@gmail.com";
+  const recipient = rawRecipient.trim().toLowerCase();
 
   try {
     const { data, error } = await resend.emails.send({
